@@ -6,6 +6,8 @@ import threading
 import os
 from dotenv import load_dotenv
 
+from decode import LZW_decode
+
 load_dotenv()
 URL = os.getenv("WEBSOCKETURL")
 
@@ -16,7 +18,7 @@ def on_open(ws):
     
     ws.send(json.dumps({"a": 111})) # handshake message
 
-    # Automatically close after 10 seconds
+    # Automatically close after 1 seconds
     def close_ws():
         time.sleep(1)
         print("Closing WebSocket after 1 seconds")
@@ -27,19 +29,20 @@ def on_open(ws):
     print("Sent start command to begin streaming")
 
 
+
+
 # we dont need this in this case as the data isn't being passed as a binary
 def on_data(ws, data, data_type, continue_flag):
-    if data_type == websocket.ABNF.OPCODE_BINARY:
-        print("Binary frame received. Length:", len(data))
-    else:
-        print("Non-binary data type:", data_type)
+    compressed_bytes = data.encode('utf-8', errors='ignore')
+    decoded = LZW_decode(compressed_bytes)
+    print(decoded.decode('utf-8', errors='replace'))
 
 
 
-def on_message(ws, message):
+#def on_message(ws, message):
     # Messages come in as binary — decode to JSON string
-    print("→", message)
-    print(type(message))
+    #print("→", message)
+    #print(type(message))
 
 
 
@@ -57,8 +60,8 @@ if __name__ == "__main__":
     ws = websocket.WebSocketApp(
         URL,
         on_open=on_open,
-        on_message=on_message,
-        #on_data=on_data,
+        #on_message=on_message,
+        on_data=on_data,
         on_error=on_error,
         on_close=on_close
     )
