@@ -24,5 +24,6 @@ def LZW_decode(b):
         o += 1
         f = a
     return ''.join(g).encode()
+    #return ''.join(g)
 
 
